@@ -1,0 +1,37 @@
+name: Deploy bucket
+
+# gatilho para fazer o workflow
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+
+    # vai rodar dentro de um docker com ubuntu
+    runs-on: ubuntu-latest
+
+    # passos a serem excecutados
+    steps:
+    - uses: actions/checkout@v2 #copia o codigo do repositório p dentro do docker
+    - name: Set up Python
+      uses: actions/setup-python@v2 #instala o setup do python
+      with:
+        python-version: '3.x'
+    - uses: actions/setup-node@v2-beta #instalação do node
+      with:
+        node-version: '12'
+    - name: Install dependencies
+      run: |
+        npm install -g aws-cdk
+        pip install -r requirements.txt
+    - name: Deploy
+
+    # variaveis de ambiente disponiveis
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      run: |
+        cdk deploy "*" --require-approval never
